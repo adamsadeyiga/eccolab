@@ -1,0 +1,17 @@
+{
+    "name": "yigatech/phpmvc-framework",
+    "autoload": {
+        "psr-4": {
+            "app\\": "./"
+        }
+    },
+    "authors": [
+        {
+            "name": "Adams Adeyiga",
+            "email": "alarape3@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.5"
+    }
+}
