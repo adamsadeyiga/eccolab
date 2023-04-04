@@ -1,1 +1,3 @@
 # eccolab
+
+# Project Installation Settings
