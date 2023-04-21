@@ -1,41 +1,55 @@
 <?php
 
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-use app\controllers\AuthController;
-use app\controllers\SiteController;
-use app\core\Application;
+define('LARAVEL_START', microtime(true));
 
-require_once __DIR__ . '/../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
-$dotenv->load();
+/*
+|--------------------------------------------------------------------------
+| Check If The Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is in maintenance / demo mode via the "down" command
+| we will load this file so that any pre-rendered content can be shown
+| instead of starting the framework, which could cause an exception.
+|
+*/
 
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
 
-$config =
-    [
-        'userClass' => \app\models\User::class,
-        'db' => [
-            'dsn' => $_ENV['DB_DSN'],
-            'user' => $_ENV['DB_USER'],
-            'password' => $_ENV['DB_PASSWORD'],
-        ]
-    ];
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
 
+require __DIR__.'/../vendor/autoload.php';
 
-$app = new Application(dirname(__DIR__), $config);
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request using
+| the application's HTTP kernel. Then, we will send the response back
+| to this client's browser, allowing them to enjoy our application.
+|
+*/
 
-$app->router->get('/', [SiteController::class, 'home']);
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-$app->router->get('/contact', [SiteController::class, 'contact']);
-$app->router->post('/contact', [SiteController::class, 'contact']);
+$kernel = $app->make(Kernel::class);
 
-$app->router->get('/login', [AuthController::class, 'login']);
-$app->router->post('/login', [AuthController::class, 'login']);
+$response = $kernel->handle(
+    $request = Request::capture()
+)->send();
 
-$app->router->get('/register', [AuthController::class, 'register']);
-$app->router->post('/register', [AuthController::class, 'register']);
-
-$app->router->get('/profile', [AuthController::class, 'profile']);
-
-$app->router->get('/logout', [AuthController::class, 'logout']);
-
-$app->run();
+$kernel->terminate($request, $response);
